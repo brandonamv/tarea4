@@ -39,7 +39,7 @@ public:
 	void insert(Elem key);
 	void deleteMin();
 	void reduceKey(node<Elem>* x, Elem key);
-
+	node<Elem>* search(node<Elem>* n,Elem key);
 private:
 	void insertNode(node<Elem>* x, node<Elem>* y);
 	void cut(node<Elem>* x, node<Elem>* y);
@@ -47,6 +47,7 @@ private:
 	void foundMin();
 	void consolidate();
 	node<Elem>* minH;
+	float ro = (1 + sqrt(5)) / 2;
 	int size;
 };
 
@@ -114,9 +115,9 @@ inline void fibonacciHeap<Elem>::deleteMin()
 template<class Elem>
 inline void fibonacciHeap<Elem>::reduceKey(node<Elem>* x, Elem key)
 {
-	if (x->key>key)
+	if (x->key<key)
 	{
-		std::cout << "Ney key its greater than current key\n";
+		std::cout << "New key its greater than current key\n";
 		return;
 	}
 	x->key = key;
@@ -130,6 +131,26 @@ inline void fibonacciHeap<Elem>::reduceKey(node<Elem>* x, Elem key)
 	{
 		this->minH = x;
 	}
+}
+
+template<class Elem>
+inline node<Elem>* fibonacciHeap<Elem>::search(node<Elem>* n,Elem key)
+{
+	node<Elem>* init = n;
+	node<Elem>* last = n;
+	do
+	{
+		if (init->key==key)
+		{
+			return init;
+		}
+		if (init->child)
+		{
+			return search(init->child, key);
+		}
+		init = init->right;
+	} while (init!=last);
+	return nullptr;
 }
 
 template<class Elem>
@@ -170,27 +191,41 @@ inline void fibonacciHeap<Elem>::cut(node<Elem>* x, node<Elem>* y)
 template<class Elem>
 inline void fibonacciHeap<Elem>::cascadingCut(node<Elem>* y)
 {
+	node<Elem>* z = y->father;
+	if (z)
+	{
+		if (!y->mark)
+		{
+			y->mark = true;
+		}
+		else
+		{
+			this->cut(y, z);
+			this->cascadingCut(z);
+		}
+	}
 }
 
 template<class Elem>
 inline void fibonacciHeap<Elem>::foundMin()
 {
 	node<Elem>* pivot = this->minH;
-	node<Elem>* next = this->minH->right;
-	while (next!=pivot)
+	node<Elem>* next = this->minH;
+	do
 	{
-		if (next->key<pivot->key)
+		if (next->key < this->minH->key)
 		{
 			this->minH = next;
 		}
 		next = next->right;
-	}
+	} while (pivot!=next);
 }
 
 template<class Elem>
 inline void fibonacciHeap<Elem>::consolidate()
 {
-	int n = (int)log2(this->size) + 1;
+
+	int n = (int)(log(this->size) / log(this->ro)) + 1;
 	std::vector<node<Elem>*> A(n, nullptr);
 	node<Elem>* pivot = this->minH;
 	node<Elem>* next = this->minH;
@@ -205,7 +240,6 @@ inline void fibonacciHeap<Elem>::consolidate()
 			if (x->key>y->key)
 			{
 				node<Elem>* aux = x;
-
 				x = y;
 				y = aux;
 			}
@@ -222,12 +256,20 @@ inline void fibonacciHeap<Elem>::consolidate()
 				}
 			}
 			else {
-				x->child = y;
-				y->left = y;
-				y->right = y;
+				
+				if (y)
+				{
+					x->child = y;
+					y->left = y;
+					y->right = y;
+				}
+				
 			}
-
-			y->father = x;
+			if (y)
+			{
+				y->father = x;
+			}
+			
 			A[d] = nullptr;
 			d++;
 		}

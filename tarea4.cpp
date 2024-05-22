@@ -6,14 +6,24 @@
 #include "heap.h"
 int main()
 {
-    std::vector<int> temp = { 4,3,2,1,0 };
+    std::vector<int> temp = { 0,3,6,1,2,4,7 };
     fibonacciHeap<int>test;
+    heap<int>test2;
     for (int i : temp) {
         test.insert(i);
+        test2.insert(i);
     }
     node<int>* temp1 = test.getMin();
     std::cout <<temp1->key << "\n";
     test.deleteMin();
+    test2.deleteMin();
+
+    test.reduceKey(test.getMin()->child, 0);
+    test2.reduceKey(4, 0);
+    temp1 = test.getMin();
+    temp1=test.search(test.getMin(), 7);
+    std::cout << temp1->key << "\n";
+    /*test.deleteMin();
     temp1 = test.getMin();
     std::cout << temp1->key << "\n";
     test.deleteMin();
@@ -21,10 +31,7 @@ int main()
     std::cout << temp1->key << "\n";
     test.deleteMin();
     temp1 = test.getMin();
-    std::cout << temp1->key << "\n";
-    test.deleteMin();
-    temp1 = test.getMin();
-    std::cout << temp1->key << "\n";
+    std::cout << temp1->key << "\n";*/
 
     
 }
